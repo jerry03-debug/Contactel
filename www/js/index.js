@@ -193,8 +193,15 @@ function addEventListeners() {
     });
     
     // Alphabet index navigation
-    $('.alphabet-index li').on('click', function() {
-        navigateToLetter($(this).text());
+    $('.alphabet-index li a').on('click', function(e) {
+        e.preventDefault();
+        const letter = $(this).text();
+        navigateToLetter(letter);
+    });
+    
+    // Écouteur pour le bouton "Tous les contacts"
+    $(document).on('click', '#show-all-contacts', function() {
+        showAllContacts();
     });
     
     // Add contact button
@@ -485,7 +492,7 @@ function displayContacts(contactsToDisplay) {
     
     sortedKeys.forEach(function(key) {
         html += `
-            <div class="contact-group" id="letter-${key}">
+            <div class="contact-group" id="section-${key}">
                 <div class="contact-group-header">${key}</div>
         `;
         
@@ -518,27 +525,86 @@ function displayContacts(contactsToDisplay) {
 }
 
 function filterContacts(query) {
+    query = query.toLowerCase();
+    
     if (!query) {
         displayContacts(contacts);
         return;
     }
     
-    query = query.toLowerCase();
-    
-    const filteredContacts = contacts.filter(function(contact) {
-        return (
-            contact.displayName.toLowerCase().includes(query) ||
-            (contact.phoneNumbers.length > 0 && contact.phoneNumbers[0].value.includes(query))
-        );
+    const filteredContacts = contacts.filter(contact => {
+        const lastName = (contact.lastName || '').toLowerCase();
+        const firstName = (contact.firstName || '').toLowerCase();
+        const fullName = `${firstName} ${lastName}`.trim().toLowerCase();
+        const phoneNumber = (contact.phoneNumbers.length > 0 ? contact.phoneNumbers[0].value : '').toLowerCase();
+        
+        // Recherche par nom, prénom ou numéro de téléphone
+        return fullName.includes(query) || phoneNumber.includes(query);
     });
     
     displayContacts(filteredContacts);
 }
 
+// Variable pour suivre le filtre actuel
+let currentFilter = null;
+
 function navigateToLetter(letter) {
-    const element = document.getElementById(`letter-${letter}`);
-    if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
+    // Si c'est le caractère '#', afficher tous les contacts
+    if (letter === '#') {
+        showAllContacts();
+        return true;
+    }
+    
+    // Mettre à jour le filtre actuel
+    currentFilter = letter;
+    
+    // Filtrer les contacts par la lettre sélectionnée
+    const filteredContacts = contacts.filter(contact => {
+        // Utiliser le prénom pour le filtrage
+        const firstName = contact.firstName || '';
+        
+        // Obtenir la première lettre du prénom
+        const firstLetter = firstName.charAt(0).toUpperCase();
+        return firstLetter === letter;
+    });
+    
+    // Afficher les contacts filtrés
+    displayContacts(filteredContacts);
+    
+    // Mettre à jour l'interface pour montrer le filtre actif
+    updateFilterInterface(letter);
+    
+    return true;
+}
+
+function showAllContacts() {
+    // Réinitialiser le filtre
+    currentFilter = null;
+    
+    // Afficher tous les contacts
+    displayContacts(contacts);
+    
+    // Mettre à jour l'interface pour montrer qu'aucun filtre n'est actif
+    updateFilterInterface(null);
+    
+    return true;
+}
+
+function updateFilterInterface(letter) {
+    // Mettre à jour la classe active sur les lettres
+    $('.alphabet-index li a').removeClass('active');
+    
+    if (letter) {
+        $(`.alphabet-index li a[href="#section-${letter}"]`).addClass('active');
+        
+        // S'assurer que le bouton "Tous" est visible
+        if ($('#show-all-contacts').length === 0) {
+            // Ajouter le bouton au début de la liste des contacts
+            $('.contacts-list').prepend('<div id="show-all-contacts-container"><button id="show-all-contacts" class="show-all-btn">Tous les contacts</button></div>');
+        }
+    } else {
+        // Si aucun filtre, on peut cacher le bouton "Tous"
+        $('#show-all-contacts-container').remove();
     }
 }
 
