@@ -163,11 +163,14 @@ $(document).on('pagebeforeshow', '[data-role=page]', function() {
 
 // Fonction pour changer de page manuellement
 function changePage(pageId) {
+    console.log('Changing page to:', pageId);
+    
     // Masquer toutes les pages
     $('[data-role=page]').hide();
     
     // Afficher la page demandée
     $(pageId).show();
+    console.log('Page visibility changed');
     
     // Mettre à jour l'URL sans déclencher d'événement de navigation
     if (history.pushState) {
@@ -175,10 +178,12 @@ function changePage(pageId) {
     } else {
         window.location.hash = pageId;
     }
+    console.log('URL updated');
     
     // Déclencher l'événement pageshow manuellement
     $(document).trigger('pagebeforeshow', { toPage: $(pageId) });
     $(document).trigger('pageshow', { toPage: $(pageId) });
+    console.log('Page events triggered');
 }
 
 function addEventListeners() {
@@ -209,12 +214,52 @@ function addEventListeners() {
     });
     
     // Contact item click
-    $(document).on('click', '.contact-item', function() {
-        const contactId = $(this).data('id');
-        const contact = contacts.find(c => c.id === contactId);
+    $(document).on('click', '.contact-item', function(e) {
+        console.log('Contact item clicked');
+        
+        // Récupérer la lettre du groupe
+        const groupKey = $(this).closest('.contact-group').find('.contact-group-header').text();
+        console.log('Group key:', groupKey);
+        
+        // Utiliser directement l'index du contact dans le groupe
+        const contactIndex = $(this).data('index');
+        console.log('Contact index in group:', contactIndex);
+        
+        // Récupérer tous les contacts qui commencent par cette lettre
+        const contactsInGroup = contacts.filter(c => {
+            const firstLetter = (c.displayName.charAt(0) || '#').toUpperCase();
+            return firstLetter === groupKey;
+        });
+        
+        console.log('Contacts in group:', contactsInGroup);
+        
+        // Récupérer le contact par son index dans le groupe
+        const contact = contactsInGroup[contactIndex];
+        console.log('Contact found by index:', contact);
+        
         if (contact) {
-            openContactDetail(contact);
+            e.preventDefault(); // Empêcher tout comportement par défaut
+            e.stopPropagation(); // Arrêter la propagation de l'événement
+            console.log('Opening contact detail...');
+            
+            // Masquer toutes les pages de manière explicite
+            $('[data-role=page]').hide();
+            
+            // Initialiser les détails du contact
+            currentContact = contact;
+            $('#contact-initials').text(getInitials(contact));
+            $('#contact-name').text(contact.displayName);
+            $('#contact-phone').text(contact.phoneNumbers.length > 0 ? contact.phoneNumbers[0].value : 'Aucun numéro');
+            $('#contact-email').text(contact.emails.length > 0 ? contact.emails[0].value : 'Aucun email');
+            $('#contact-notes').text(contact.note || 'Aucune note');
+            
+            // Afficher la page de détails
+            $('#contact-detail-page').show();
+            console.log('Contact detail page shown directly');
+        } else {
+            console.error('Contact non trouvé pour l\'index:', contactIndex, 'dans le groupe:', groupKey);
         }
+        return false; // Empêcher toute autre action par défaut
     });
     
     // Edit contact button - Empêcher le comportement par défaut et utiliser notre fonction
@@ -409,6 +454,7 @@ function loadSampleContacts() {
 
 function displayContacts(contactsToDisplay) {
     console.log('Displaying contacts:', contactsToDisplay.length);
+    console.log('Contact IDs:', contactsToDisplay.map(c => c.id));
     
     if (contactsToDisplay.length === 0) {
         $('#contacts-list').html(`
@@ -450,7 +496,7 @@ function displayContacts(contactsToDisplay) {
                 '';
             
             html += `
-                <div class="contact-item" data-id="${contact.id}">
+                <div class="contact-item" data-id="${contact.id}" data-index="${groupedContacts[key].indexOf(contact)}">
                     <div class="contact-avatar">
                         <div class="avatar-placeholder" style="background-color: ${getRandomColor(contact.id)}">
                             <span>${initials}</span>
@@ -497,6 +543,7 @@ function navigateToLetter(letter) {
 }
 
 function openContactDetail(contact) {
+    console.log('openContactDetail called with contact:', contact);
     currentContact = contact;
     
     // Populate contact details
@@ -513,8 +560,21 @@ function openContactDetail(contact) {
     
     $('#contact-notes').text(contact.note || 'Aucune note');
     
-    // Navigate to contact detail page
-    changePage('#contact-detail-page');
+    console.log('Populated contact details, now changing page...');
+    
+    // Masquer toutes les pages
+    $('[data-role=page]').hide();
+    
+    // Afficher directement la page de détails
+    $('#contact-detail-page').show();
+    
+    console.log('Changed display of pages directly');
+    
+    // Puis utiliser la fonction changePage comme backup
+    setTimeout(function() {
+        console.log('Running changePage after timeout');
+        changePage('#contact-detail-page');
+    }, 200);
 }
 
 function closeContactDetail() {
@@ -619,45 +679,81 @@ function saveContact() {
         // Si nous sommes sur un appareil, mettre à jour le contact dans le téléphone
         if (navigator.contacts) {
             try {
-                // Créer un objet contact Cordova
-                const phoneContact = navigator.contacts.create();
+                console.log('Updating contact in phone, contact ID:', currentContact.id);
                 
-                // Définir les propriétés du contact
-                phoneContact.id = currentContact.id;
-                phoneContact.displayName = currentContact.displayName;
+                // Selon la documentation de Cordova, pour mettre à jour un contact existant,
+                // il faut d'abord le récupérer, puis le modifier et le sauvegarder
+                const options = new ContactFindOptions();
+                options.filter = currentContact.id;  // Filtre par ID
+                options.multiple = false;  // On ne veut qu'un seul résultat
                 
-                // Définir le nom
-                phoneContact.name = new ContactName();
-                phoneContact.name.givenName = currentContact.firstName;
-                phoneContact.name.familyName = currentContact.lastName;
-                phoneContact.name.formatted = currentContact.displayName;
+                const fields = [navigator.contacts.fieldType.id];
                 
-                // Définir les numéros de téléphone
-                if (currentContact.phoneNumbers.length > 0) {
-                    phoneContact.phoneNumbers = currentContact.phoneNumbers.map(function(phone) {
-                        return new ContactField(phone.type, phone.value);
-                    });
-                }
-                
-                // Définir les emails
-                if (currentContact.emails.length > 0) {
-                    phoneContact.emails = currentContact.emails.map(function(email) {
-                        return new ContactField(email.type, email.value);
-                    });
-                }
-                
-                // Définir la note
-                phoneContact.note = currentContact.note;
-                
-                // Sauvegarder le contact
-                phoneContact.save(function() {
-                    console.log('Contact saved to phone');
+                // Chercher le contact existant
+                navigator.contacts.find(fields, function(contacts) {
+                    console.log('Find contact success, found contacts:', contacts);
+                    
+                    if (contacts && contacts.length > 0) {
+                        // Contact trouvé, on le met à jour
+                        const phoneContact = contacts[0];
+                        
+                        // Mettre à jour le nom affiché
+                        phoneContact.displayName = currentContact.displayName;
+                        
+                        // Mettre à jour le nom
+                        if (!phoneContact.name) {
+                            phoneContact.name = new ContactName();
+                        }
+                        phoneContact.name.givenName = currentContact.firstName;
+                        phoneContact.name.familyName = currentContact.lastName;
+                        phoneContact.name.formatted = currentContact.displayName;
+                        
+                        // Mettre à jour les numéros de téléphone
+                        if (currentContact.phoneNumbers.length > 0) {
+                            phoneContact.phoneNumbers = [];
+                            currentContact.phoneNumbers.forEach(function(phone) {
+                                phoneContact.phoneNumbers.push(
+                                    new ContactField(phone.type, phone.value, phone.type === 'mobile')
+                                );
+                            });
+                        } else {
+                            phoneContact.phoneNumbers = [];
+                        }
+                        
+                        // Mettre à jour les emails
+                        if (currentContact.emails.length > 0) {
+                            phoneContact.emails = [];
+                            currentContact.emails.forEach(function(email) {
+                                phoneContact.emails.push(
+                                    new ContactField(email.type, email.value, email.type === 'home')
+                                );
+                            });
+                        } else {
+                            phoneContact.emails = [];
+                        }
+                        
+                        // Mettre à jour la note
+                        phoneContact.note = currentContact.note;
+                        
+                        // Sauvegarder les modifications
+                        phoneContact.save(function() {
+                            console.log('Contact updated successfully in phone');
+                        }, function(error) {
+                            console.error('Error saving updated contact:', error);
+                            alert('Le contact a été mis à jour dans l\'application, mais pas dans le téléphone.');
+                        });
+                    } else {
+                        console.error('Contact not found in phonebook with ID:', currentContact.id);
+                        alert('Le contact n\'a pas été trouvé dans le téléphone.');
+                    }
                 }, function(error) {
-                    console.error('Error saving contact to phone:', error);
-                    alert('Le contact a été mis à jour dans l\'application, mais pas dans le téléphone.');
-                });
+                    console.error('Error finding contact to update:', error);
+                    alert('Erreur lors de la recherche du contact dans le téléphone.');
+                }, options);
+                
             } catch (error) {
-                console.error('Error updating contact in phone:', error);
+                console.error('Error in update contact process:', error);
+                alert('Erreur lors de la mise à jour du contact.');
             }
         }
     } else {
@@ -772,6 +868,15 @@ function deleteContact(contact) {
         
         // Go back to home page
         changePage('#home-page');
+    }
+}
+
+// Fonction pour gérer le clic sur un contact
+function handleContactClick(contactId) {
+    console.log('Contact clicked:', contactId);
+    const contact = contacts.find(c => c.id === contactId);
+    if (contact) {
+        openContactDetail(contact);
     }
 }
 

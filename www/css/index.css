@@ -194,30 +194,43 @@ body {
 }
 
 .contact-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    margin-right: 16px;
-    overflow: hidden;
+    margin-bottom: 20px;
     display: flex;
-    align-items: center;
+    margin: auto;
     justify-content: center;
+    align-items: center;
 }
 
 .avatar-placeholder {
-    width: 100%;
-    height: 100%;
-    background-color: var(--secondary-color);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 14px;
     color: white;
     font-weight: 600;
-    font-size: 18px;
+}
+
+/* Avatar plus grand pour la page d'ajout/édition de contact */
+#contact-form-page .avatar-placeholder {
+    width: 120px;
+    height: 120px;
+    font-size: 40px;
+}
+
+/* Avatar plus grand pour la page de détails du contact */
+#contact-detail-page .avatar-placeholder {
+    width: 100px;
+    height: 100px;
+    font-size: 16px;
 }
 
 .contact-details {
     flex: 1;
+    padding-left: 5px;
 }
 
 .contact-name {
@@ -362,6 +375,7 @@ body {
     width: 100%;
     padding: 12px 16px;
     border: 1px solid var(--border-color);
+    background-color: #e4e4e4;
     border-radius: 8px;
     font-size: 16px;
     color: var(--text-color);
