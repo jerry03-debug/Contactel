@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="sn.esp.dgi.dic3.contactel" version="1.0.0" 
+    xmlns="http://www.w3.org/ns/widgets" 
+    xmlns:cdv="http://cordova.apache.org/ns/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>Contactel</name>
+    <description>Sample Apache Cordova App</description>
+    <author email="dev@cordova.apache.org" href="https://cordova.apache.org">
+        Apache Cordova Team
+    </author>
+    <content src="index.html" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <platform name="android">
+        <preference name="android-buildToolsVersion" value="36.0.0" />
+        <preference name="android-compileSdkVersion" value="36" />
+        <preference name="android-targetSdkVersion" value="36" />
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.READ_CONTACTS" />
+            <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+        </config-file>
+    </platform>
+    <platform name="ios">
+        <edit-config target="NSContactsUsageDescription" file="*-Info.plist" mode="merge">
+            <string>Cette application a besoin d'accéder à vos contacts pour les afficher et les gérer.</string>
+        </edit-config>
+    </platform>
+</widget>

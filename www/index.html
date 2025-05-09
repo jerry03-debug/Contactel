@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval' https://code.jquery.com https://ajax.googleapis.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; media-src *; img-src 'self' data: content:;">
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+        <meta name="color-scheme" content="light dark">
+        <!-- jQuery Mobile CSS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-mobile/1.4.5/jquery.mobile.min.css">
+        <link rel="stylesheet" href="css/index.css">
+        <title>Contactel</title>
+    </head>
+    <body>
+        <div data-role="page" id="home-page">
+            <!-- Header with search bar -->
+            <div data-role="header" class="header">
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Rechercher">
+                    <div class="search-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contacts list -->
+            <div data-role="content" class="contacts-container">
+                <!-- Alphabet index -->
+                <div class="alphabet-index">
+                    <ul>
+                        <li>A</li>
+                        <li>B</li>
+                        <li>C</li>
+                        <li>D</li>
+                        <li>E</li>
+                        <li>F</li>
+                        <li>G</li>
+                        <li>H</li>
+                        <li>I</li>
+                        <li>J</li>
+                        <li>K</li>
+                        <li>L</li>
+                        <li>M</li>
+                        <li>N</li>
+                        <li>O</li>
+                        <li>P</li>
+                        <li>Q</li>
+                        <li>R</li>
+                        <li>S</li>
+                        <li>T</li>
+                        <li>U</li>
+                        <li>V</li>
+                        <li>W</li>
+                        <li>X</li>
+                        <li>Y</li>
+                        <li>Z</li>
+                        <li>#</li>
+                    </ul>
+                </div>
+
+                <!-- Contacts list -->
+                <div class="contacts-list" id="contacts-list">
+                    <!-- Contacts will be dynamically added here -->
+                    <div class="empty-state">
+                        <p>Chargement des contacts...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add contact button -->
+            <div class="add-contact-button" id="add-contact-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 0a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2H9v6a1 1 0 1 1-2 0V9H1a1 1 0 0 1 0-2h6V1a1 1 0 0 1 1-1z"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Contact detail page -->
+        <div data-role="page" id="contact-detail-page">
+            <div data-role="header" class="modal-header">
+                <a href="#home-page" data-rel="back" class="close-btn">&times;</a>
+                <h1 id="detail-header">Contact</h1>
+                <a href="#contact-form-page" id="edit-contact-btn" class="edit-btn">Modifier</a>
+            </div>
+            <div data-role="content">
+                <div class="contact-avatar">
+                    <div class="avatar-placeholder">
+                        <span id="contact-initials"></span>
+                    </div>
+                </div>
+                <h2 id="contact-name"></h2>
+                <div class="contact-actions">
+                    <div class="action-button">
+                        <div class="action-icon message-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2zm13 2.383-4.708 2.825L15 11.105V5.383zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741zM1 11.105l4.708-2.897L1 5.383v5.722z"/>
+                            </svg>
+                        </div>
+                        <span>Message</span>
+                    </div>
+                    <div class="action-button">
+                        <div class="action-icon call-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122l-2.19.547a1.745 1.745 0 0 1-1.657-.459L5.482 8.062a1.745 1.745 0 0 1-.46-1.657l.548-2.19a.678.678 0 0 0-.122-.58L3.654 1.328zM1.884.511a1.745 1.745 0 0 1 2.612.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.678.678 0 0 0 .178.643l2.457 2.457a.678.678 0 0 0 .644.178l2.189-.547a1.745 1.745 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.634 18.634 0 0 1-7.01-4.42 18.634 18.634 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877L1.885.511z"/>
+                            </svg>
+                        </div>
+                        <span>Appeler</span>
+                    </div>
+                    <div class="action-button">
+                        <div class="action-icon video-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M0 5a2 2 0 0 1 2-2h7.5a2 2 0 0 1 1.983 1.738l3.11-1.382A1 1 0 0 1 16 4.269v7.462a1 1 0 0 1-1.406.913l-3.111-1.382A2 2 0 0 1 9.5 13H2a2 2 0 0 1-2-2V5z"/>
+                            </svg>
+                        </div>
+                        <span>Vidéo</span>
+                    </div>
+                </div>
+                <div class="contact-info">
+                    <div class="info-item">
+                        <div class="info-label">Téléphone</div>
+                        <div class="info-value" id="contact-phone"></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Email</div>
+                        <div class="info-value" id="contact-email"></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Notes</div>
+                        <div class="info-value" id="contact-notes"></div>
+                    </div>
+                </div>
+                <div class="delete-contact">
+                    <button id="delete-contact-btn">Supprimer le contact</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add/Edit Contact Form Page -->
+        <div data-role="page" id="contact-form-page">
+            <div data-role="header" class="modal-header">
+                <a href="#" data-rel="back" class="close-btn" id="close-form-btn">&times;</a>
+                <h1 id="form-header">Nouveau contact</h1>
+                <button class="save-btn" id="save-contact-btn">Enregistrer</button>
+            </div>
+            <div data-role="content">
+                <div class="contact-avatar">
+                    <div class="avatar-placeholder editable">
+                        <span id="form-contact-initials"></span>
+                        <div class="avatar-edit-overlay">
+                            <span>Ajouter</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <div class="form-group">
+                        <input type="text" id="form-first-name" placeholder="Prénom">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="form-last-name" placeholder="Nom">
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" id="form-phone" placeholder="Téléphone">
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="form-email" placeholder="Email">
+                    </div>
+                    <div class="form-group">
+                        <textarea id="form-notes" placeholder="Notes"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- jQuery and jQuery Mobile -->
+        <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile.min.js"></script>
+        <script src="js/index.js"></script>
+        <script src="cordova.js"></script>
+    </body>
+</html>
